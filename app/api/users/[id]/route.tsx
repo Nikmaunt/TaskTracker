@@ -1,12 +1,16 @@
 import {NextRequest, NextResponse} from "next/server";
 import schema from "@/app/api/users/schema";
+import prisma from "@/prisma/client";
 
-export function GET(
+export async function GET(
     request: NextRequest,
-    {params}: { params: { id: number } }) {
-    if (params.id > 10)
+    {params}: { params: { id: string } }) {
+    const user = await prisma.user.findUnique({
+        where: {id: parseInt(params.id)}
+    })
+    if (!user)
         return NextResponse.json({error: 'User not found'}, {status: 404})
-    return NextResponse.json({id: 1, name: 'Biba'})
+    return NextResponse.json(user)
 }
 
 export async function PUT(
@@ -21,10 +25,16 @@ export async function PUT(
     return NextResponse.json({id: 1, name: body.name}, {status: 404})
 }
 
-export function DELETE(
+export async function DELETE(
     request: NextRequest,
-    {params}: { params: { id: number } }) {
-    if (params.id > 10)
+    {params}: { params: { id: string } }) {
+    const user = await prisma.user.findUnique({
+        where: {id: parseInt(params.id)}
+    })
+    if (!user)
         return NextResponse.json({error: 'User not found'}, {status: 404})
+    await prisma.user.delete({
+        where: {id: user.id}
+    })
     return NextResponse.json({})
 }
